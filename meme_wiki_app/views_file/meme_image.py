@@ -21,6 +21,16 @@ import os
 import random
 import string
 import re
+
+'''
+视图集方法重写的对应关系：
+"get": "retrieve",
+"post":"create"
+"put": "update",(全部更新)
+"patch": "partial_update",(部分更新)
+"delete":"destroy",
+'''
+
 '''
 图片上传模块
 '''
@@ -107,3 +117,23 @@ class ImageSearch(viewsets.ModelViewSet):
         print(result)
         
         return HttpResponse('success')
+'''
+图片标签修改模块
+'''
+class ImageChange(viewsets.ModelViewSet):
+    serializer_class = ImageInfoSerializer
+    queryset = Tags.objects.all()
+    def put(self,request):
+        change_tag = request.GET.get('tag').split(';')
+        print(change_tag)
+        for items in change_tag:
+            tag = Tags(tag_name=items)
+            '''上次改到这'''
+            tag_queryset = Tags.objects.filter(tag_name=items)
+            if tag_queryset.exists():
+                tag.id = tag_queryset.values('id')[0]['id']
+                tag.save()
+                tag.images.add(image)
+            else:
+                tag.save()
+                tag.images.add(image)
